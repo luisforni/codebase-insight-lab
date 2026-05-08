@@ -154,46 +154,70 @@ async function restoreSession(
 }
 
 export function useFileSystem() {
-  const { addWorkspace, toggleFolder: _toggleFolder } = useFileStore()
+  const { addWorkspace, toggleFolder: _toggleFolder, workspaces } = useFileStore()
   const { initConfigDir, updateGitignore } = useProjectConfig()
+
+  const openWorkspaceFromHandle = useCallback(async (dirHandle: FileSystemDirectoryHandle) => {
+    const existing = workspaces.find(w => w.name === dirHandle.name)
+    if (existing) return existing
+
+    const tree = await buildFileTree(dirHandle, dirHandle.name)
+
+    const workspace: Workspace = {
+      id: generateId(),
+      name: dirHandle.name,
+      rootPath: dirHandle.name,
+      handle: dirHandle,
+      tree,
+      addedAt: Date.now(),
+    }
+
+    addWorkspace(workspace)
+
+    const { saveWorkspaceHandle } = useSessionStore.getState()
+    await saveWorkspaceHandle('last', dirHandle)
+    localStorage.setItem('cil:lastWorkspaceName', dirHandle.name)
+
+    const { selectedModel, depthMode } = useAgentStore.getState()
+    initConfigDir(dirHandle, selectedModel, depthMode).catch(console.warn)
+    updateGitignore(dirHandle).catch(console.warn)
+
+    restoreSession(dirHandle, workspace.id, workspace.rootPath).catch(console.warn)
+    return workspace
+  }, [addWorkspace, initConfigDir, updateGitignore, workspaces])
+
+  const ensureWorkspacePermission = useCallback(async (
+    handle: FileSystemDirectoryHandle,
+    alertOnDenied: boolean,
+  ) => {
+    const fsHandle = handle as FileSystemDirectoryHandle & {
+      queryPermission: (d: { mode: string }) => Promise<PermissionState>
+      requestPermission: (d: { mode: string }) => Promise<PermissionState>
+    }
+
+    let perm = await fsHandle.queryPermission({ mode: 'readwrite' })
+    if (perm === 'prompt') {
+      perm = await fsHandle.requestPermission({ mode: 'readwrite' })
+    }
+
+    if (perm !== 'granted' && alertOnDenied) {
+      window.alert('No hay permiso para abrir la carpeta guardada. Concede permiso o abre la carpeta manualmente.')
+    }
+
+    return perm === 'granted'
+  }, [])
 
   const openFolder = useCallback(async () => {
     try {
       const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' })
-      const tree = await buildFileTree(dirHandle, dirHandle.name)
-
-      const workspace: Workspace = {
-        id: generateId(),
-        name: dirHandle.name,
-        rootPath: dirHandle.name,
-        handle: dirHandle,
-        tree,
-        addedAt: Date.now(),
-      }
-
-      addWorkspace(workspace)
-
-      
-      const { saveWorkspaceHandle } = useSessionStore.getState()
-      await saveWorkspaceHandle('last', dirHandle)
-      localStorage.setItem('cil:lastWorkspaceName', dirHandle.name)
-
-      
-      const { selectedModel, depthMode } = useAgentStore.getState()
-      initConfigDir(dirHandle, selectedModel, depthMode).catch(console.warn)
-      updateGitignore(dirHandle).catch(console.warn)
-
-      
-      restoreSession(dirHandle, workspace.id, workspace.rootPath).catch(console.warn)
-
-      return workspace
+      return await openWorkspaceFromHandle(dirHandle)
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
         console.error('Failed to open folder:', err)
       }
       return null
     }
-  }, [addWorkspace, initConfigDir, updateGitignore])
+  }, [openWorkspaceFromHandle])
 
   const readFile = useCallback(async (handle: FileSystemFileHandle): Promise<string> => {
     const file = await handle.getFile()
@@ -251,5 +275,26 @@ export function useFileSystem() {
     }
   }, [])
 
-  return { openFolder, readFile, expandFolder, writeFile }
+  const restoreLastFolder = useCallback(async (opts?: { alertOnDenied?: boolean }) => {
+    try {
+      const { loadWorkspaceHandle } = useSessionStore.getState()
+      const handle = await loadWorkspaceHandle('last')
+      if (!handle) return null
+
+      const hasPermission = await ensureWorkspacePermission(handle, opts?.alertOnDenied ?? false)
+      if (!hasPermission) return null
+
+      return await openWorkspaceFromHandle(handle)
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Restore failed:', err)
+        if (opts?.alertOnDenied) {
+          window.alert('No se pudo restaurar la carpeta guardada. Abrela manualmente.')
+        }
+      }
+      return null
+    }
+  }, [ensureWorkspacePermission, openWorkspaceFromHandle])
+
+  return { openFolder, restoreLastFolder, readFile, expandFolder, writeFile }
 }

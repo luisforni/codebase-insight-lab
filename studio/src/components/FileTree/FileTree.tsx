@@ -137,9 +137,9 @@ function RestoreBanner({ name, onRestore }: { name: string; onRestore: () => voi
 
 export function FileTree({ view }: Props) {
   const { t } = useTranslation()
-  const { workspaces, selectedFilePath, setSelectedFile, updateWorkspaceTree, toggleFolder } = useFileStore()
+  const { workspaces, selectedFilePath, setSelectedFile, updateWorkspaceTree, toggleFolder, removeWorkspace } = useFileStore()
   const { openTab } = useEditorStore()
-  const { openFolder, readFile, expandFolder } = useFileSystem()
+  const { openFolder, restoreLastFolder, readFile, expandFolder } = useFileSystem()
   const [lastWorkspaceName, setLastWorkspaceName] = useState<string | null>(null)
 
   useEffect(() => {
@@ -208,7 +208,12 @@ export function FileTree({ view }: Props) {
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         
         {lastWorkspaceName && (
-          <RestoreBanner name={lastWorkspaceName} onRestore={() => openFolder()} />
+          <RestoreBanner
+            name={lastWorkspaceName}
+            onRestore={() => {
+              restoreLastFolder({ alertOnDenied: true }).catch(console.warn)
+            }}
+          />
         )}
 
         
@@ -229,12 +234,24 @@ export function FileTree({ view }: Props) {
             </div>
           ) : (
             workspaces.map(workspace => (
-              
+
               <CollapsibleSection
                 key={workspace.id}
                 title={workspace.name}
                 defaultOpen
                 indent={0}
+                action={
+                  <button
+                    className="icon-btn"
+                    title={t('explorer.removeFolder')}
+                    onClick={() => removeWorkspace(workspace.id)}
+                    style={{ width: 16, height: 16, fontSize: 13, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--vsc-fg-inactive)', opacity: 0.7 }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--vsc-error)'; (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--vsc-fg-inactive)'; (e.currentTarget as HTMLButtonElement).style.opacity = '0.7' }}
+                  >
+                    ×
+                  </button>
+                }
               >
                 {workspace.tree.map(node => (
                   <FileTreeNode

@@ -19,6 +19,7 @@ const es = {
     noFolder: 'Sin carpeta abierta',
     noFolderDesc: 'Abre una carpeta para navegar por sus archivos',
     addFolder: '+ Añadir carpeta',
+    removeFolder: 'Eliminar carpeta',
     loading: 'Cargando...',
   },
 

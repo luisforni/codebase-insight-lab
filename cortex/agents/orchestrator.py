@@ -2,13 +2,12 @@
 Orchestrator: supervisor pattern that routes requests to the appropriate agents.
 
 Routing logic:
-- file (full analysis): 3-phase parallel run → integration synthesis
+- file (full analysis): sequential run -> integration synthesis
 - question / selection: targeted agents from request
 - command_output: logs agent only
-- coder: planner → coder → reviewer
+- coder: planner -> coder -> reviewer
 - summary: summarizer agent
 """
-import asyncio
 import time
 from typing import Callable, Awaitable
 
@@ -79,8 +78,9 @@ class Orchestrator:
             elif pipeline == "summary":
                 await SummarizerAgent(model).run(msg, send)
             elif req_type in ("question", "selection") and target_agents:
-                agents = [AGENT_CLASSES[aid](model) for aid in target_agents if aid in AGENT_CLASSES]
-                await asyncio.gather(*[a.run(msg, send) for a in agents])
+                for aid in target_agents:
+                    if aid in AGENT_CLASSES:
+                        await AGENT_CLASSES[aid](model).run(msg, send)
             else:
                 await self._run_full_analysis(msg, model, send)
         except Exception as e:
@@ -91,31 +91,23 @@ class Orchestrator:
     async def _run_full_analysis(self, msg: dict, model, send: SendFn):
         analyses: dict[str, str] = {}
 
-        phase1 = {
-            "structure": StructureAgent(model),
-            "functions": FunctionsAgent(model),
-            "variables": VariablesAgent(model),
-            "imports":   ImportsAgent(model),
-        }
-        results = await asyncio.gather(
-            *[agent.run(msg, send) for agent in phase1.values()],
-            return_exceptions=True,
-        )
-        for key, result in zip(phase1.keys(), results):
-            analyses[key] = result if isinstance(result, str) else ""
-
-        phase2 = {
-            "business_logic": BusinessLogicAgent(model),
-            "error_handling": ErrorHandlingAgent(model),
-            "security":       SecurityAgent(model),
-            "logs":           LogsAgent(model),
-        }
-        results2 = await asyncio.gather(
-            *[agent.run(msg, send) for agent in phase2.values()],
-            return_exceptions=True,
-        )
-        for key, result in zip(phase2.keys(), results2):
-            analyses[key] = result if isinstance(result, str) else ""
+        sequential_agents = [
+            ("structure",      StructureAgent(model)),
+            ("functions",      FunctionsAgent(model)),
+            ("variables",      VariablesAgent(model)),
+            ("imports",        ImportsAgent(model)),
+            ("business_logic", BusinessLogicAgent(model)),
+            ("error_handling", ErrorHandlingAgent(model)),
+            ("security",       SecurityAgent(model)),
+            ("logs",           LogsAgent(model)),
+        ]
+        for key, agent in sequential_agents:
+            try:
+                result = await agent.run(msg, send)
+                analyses[key] = result if isinstance(result, str) else ""
+            except Exception as e:
+                await send({"type": "error", "error": f"Agent {key}: {e}", "timestamp": int(time.time() * 1000)})
+                analyses[key] = ""
 
         integration = IntegrationAgent(model, previous_analyses=analyses)
         await integration.run(msg, send)

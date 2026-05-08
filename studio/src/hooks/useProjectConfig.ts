@@ -32,6 +32,13 @@ export interface SessionData {
   savedAt: number
 }
 
+export interface SessionSnapshotInput {
+  openFiles?: Array<{ path: string; language: string }>
+  activeFilePath?: string | null
+  summaryDocument?: string
+  chatHistory?: SessionData['chatHistory']
+}
+
 async function getConfigDir(
   workspaceHandle: FileSystemDirectoryHandle,
 ): Promise<FileSystemDirectoryHandle> {
@@ -61,6 +68,25 @@ async function writeJsonFile(
   const writable = await fileHandle.createWritable()
   await writable.write(JSON.stringify(data, null, 2))
   await writable.close()
+}
+
+export async function saveSessionSnapshot(
+  workspaceHandle: FileSystemDirectoryHandle,
+  session: SessionSnapshotInput,
+): Promise<void> {
+  const configDir = await getConfigDir(workspaceHandle)
+  const existing = await readJsonFile<SessionData>(configDir, SESSION_FILE)
+  const updated: SessionData = {
+    version: 1,
+    openFiles: [],
+    activeFilePath: null,
+    summaryDocument: '',
+    chatHistory: [],
+    ...(existing ?? {}),
+    ...session,
+    savedAt: Date.now(),
+  }
+  await writeJsonFile(configDir, SESSION_FILE, updated)
 }
 
 export function useProjectConfig() {
@@ -126,19 +152,7 @@ export function useProjectConfig() {
     session: Partial<SessionData>,
   ): Promise<void> => {
     try {
-      const configDir = await getConfigDir(workspaceHandle)
-      const existing = await readJsonFile<SessionData>(configDir, SESSION_FILE)
-      const updated: SessionData = {
-        version: 1,
-        openFiles: [],
-        activeFilePath: null,
-        summaryDocument: '',
-        chatHistory: [],
-        ...(existing ?? {}),
-        ...session,
-        savedAt: Date.now(),
-      }
-      await writeJsonFile(configDir, SESSION_FILE, updated)
+      await saveSessionSnapshot(workspaceHandle, session)
     } catch (err) {
       console.warn('Failed to save session:', err)
     }

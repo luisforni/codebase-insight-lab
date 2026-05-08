@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels'
 import { ActivityBar } from './ActivityBar'
 import { StatusBar } from './StatusBar'
@@ -7,17 +7,26 @@ import { CodeEditor } from '../Editor/CodeEditor'
 import { AIPanel } from '../AIPanel/AIPanel'
 import { MultiTerminal } from '../Terminal/MultiTerminal'
 import { useEditorStore } from '../../store/editorStore'
+import { useFileStore } from '../../store/fileStore'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { useSessionPersistence } from '../../hooks/useSessionPersistence'
+import { useFileSystem } from '../../hooks/useFileSystem'
 
 export type SidebarView = 'explorer' | 'agents' | 'settings'
 
 export function AppLayout() {
   const [sidebarView, setSidebarView] = useState<SidebarView>('explorer')
   const isTerminalVisible = useEditorStore(s => s.isTerminalVisible)
+  const activeWorkspaceId = useFileStore(s => s.activeWorkspaceId)
+  const { restoreLastFolder } = useFileSystem()
 
   useWebSocket()
   useSessionPersistence()
+
+  useEffect(() => {
+    if (activeWorkspaceId) return
+    restoreLastFolder({ alertOnDenied: true }).catch(console.warn)
+  }, [activeWorkspaceId, restoreLastFolder])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>

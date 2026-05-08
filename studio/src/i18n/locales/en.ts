@@ -18,6 +18,7 @@ const en: Translations = {
     noFolder: 'No folder open',
     noFolderDesc: 'Open a folder to browse its files',
     addFolder: '+ Add folder',
+    removeFolder: 'Remove folder',
     loading: 'Loading...',
   },
   editor: {

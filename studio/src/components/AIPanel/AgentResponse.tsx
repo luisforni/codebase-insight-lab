@@ -245,7 +245,7 @@ function parseBlocks(md: string): Block[] {
     // Unordered list
     if (/^[-*+] /.test(line)) {
       const items = [line.replace(/^[-*+] /, '')]
-      while (i + 1 < lines.length && /^[-*+] /.test(lines[i + 1])) { i++; items.push(lines[i + 1].replace(/^[-*+] /, '')) }
+      while (i + 1 < lines.length && /^[-*+] /.test(lines[i + 1])) { i++; items.push(lines[i].replace(/^[-*+] /, '')) }
       blocks.push({ t: 'list', ordered: false, items })
       i++; continue
     }
@@ -253,7 +253,7 @@ function parseBlocks(md: string): Block[] {
     // Ordered list
     if (/^\d+\. /.test(line)) {
       const items = [line.replace(/^\d+\. /, '')]
-      while (i + 1 < lines.length && /^\d+\. /.test(lines[i + 1])) { i++; items.push(lines[i + 1].replace(/^\d+\. /, '')) }
+      while (i + 1 < lines.length && /^\d+\. /.test(lines[i + 1])) { i++; items.push(lines[i].replace(/^\d+\. /, '')) }
       blocks.push({ t: 'list', ordered: true, items })
       i++; continue
     }

@@ -1,6 +1,8 @@
 import { WSEvent, AgentId, CodeEdit } from '../types'
 import { useAgentStore } from '../store/agentStore'
 import { useEditorStore } from '../store/editorStore'
+import { useFileStore } from '../store/fileStore'
+import { saveSessionSnapshot } from '../hooks/useProjectConfig'
 
 function parseCodeEdits(content: string, filePath: string, fileName: string): void {
   try {
@@ -40,6 +42,31 @@ function handleEvent(event: WSEvent) {
   const { setAgentStatus, addResponse, appendToResponse, finalizeResponse, setAnalyzing } =
     useAgentStore.getState()
   const { addExplanation } = useEditorStore.getState()
+
+  const persistSessionNow = () => {
+    const ws = useFileStore.getState().getActiveWorkspace()
+    if (!ws?.handle) return
+
+    const { tabs, activeTabId } = useEditorStore.getState()
+    const { summaryDocument, responses } = useAgentStore.getState()
+    const activeTab = tabs.find(t => t.id === activeTabId)
+
+    saveSessionSnapshot(ws.handle, {
+      openFiles: tabs.map(t => ({ path: t.filePath, language: t.language })),
+      activeFilePath: activeTab?.filePath ?? null,
+      summaryDocument,
+      chatHistory: responses.slice(0, 50).map(r => ({
+        id: r.id,
+        agentId: r.agentId,
+        agentName: r.agentName,
+        query: r.query,
+        content: r.content,
+        timestamp: r.timestamp,
+      })),
+    }).catch(err => {
+      console.warn('Failed to persist session snapshot:', err)
+    })
+  }
 
   switch (event.type) {
     case 'analysis_started':
@@ -82,11 +109,13 @@ function handleEvent(event: WSEvent) {
             }
           }
         }
+        persistSessionNow()
       }
       break
 
     case 'analysis_completed':
       setAnalyzing(false)
+      persistSessionNow()
       break
 
     case 'hover_explanation':
