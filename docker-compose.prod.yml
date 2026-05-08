@@ -1,0 +1,56 @@
+name: codebase-insight-lab-prod
+
+# ── PRODUCTION — built images, nginx, no hot-reload ─────────────────────────
+# Usage: docker compose -f docker-compose.prod.yml up --build
+#
+# Browser:
+#   studio (nginx)  →  http://localhost:80
+#   All /api and /ws traffic is proxied by nginx to cortex internally.
+
+services:
+
+  # ── cortex (FastAPI, no reload) ────────────────────────────────────────────
+  cortex:
+    build:
+      context: ./cortex
+      dockerfile: Dockerfile
+    volumes:
+      - cortex-data:/app/data
+    env_file:
+      - .env
+    environment:
+      CORTEX_HOST: "0.0.0.0"
+      CORTEX_PORT: "8000"
+      CORTEX_RELOAD: "false"
+      DB_PATH: "data/insight.db"
+      EXPLANATIONS_PATH: "data/explanations"
+    networks:
+      - insight-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ── studio (nginx — serves built assets + proxies to cortex) ───────────────
+  studio:
+    build:
+      context: ./studio
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      cortex:
+        condition: service_healthy
+    networks:
+      - insight-net
+    restart: unless-stopped
+
+networks:
+  insight-net:
+    driver: bridge
+
+volumes:
+  cortex-data:

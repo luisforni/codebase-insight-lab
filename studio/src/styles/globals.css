@@ -1,0 +1,398 @@
+/* ─── VSCode Design Tokens ──────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --vsc-bg-editor: #1e1e1e;
+  --vsc-bg-sidebar: #252526;
+  --vsc-bg-activity-bar: #333333;
+  --vsc-bg-tab-bar: #2d2d2d;
+  --vsc-bg-tab: #2d2d2d;
+  --vsc-bg-tab-active: #1e1e1e;
+  --vsc-bg-panel: #1e1e1e;
+  --vsc-bg-status-bar: #007acc;
+  --vsc-bg-input: #3c3c3c;
+  --vsc-bg-dropdown: #2d2d2d;
+  --vsc-bg-hover: #2a2d2e;
+  --vsc-bg-selected: #04395e;
+  --vsc-bg-highlight: #264f78;
+  --vsc-bg-badge: #007acc;
+  --vsc-bg-terminal: #1e1e1e;
+  --vsc-bg-tooltip: #2d2d2d;
+  --vsc-bg-button: #0e639c;
+  --vsc-bg-button-hover: #1177bb;
+  --vsc-bg-button-secondary: #3a3d41;
+
+  /* Foregrounds / Text */
+  --vsc-fg-primary: #d4d4d4;
+  --vsc-fg-secondary: #cccccc;
+  --vsc-fg-muted: #858585;
+  --vsc-fg-inactive: #6d6d6d;
+  --vsc-fg-disabled: #505050;
+  --vsc-fg-tab-inactive: #969696;
+  --vsc-fg-badge: #ffffff;
+  --vsc-fg-status-bar: #ffffff;
+  --vsc-fg-icon: #c5c5c5;
+  --vsc-fg-icon-hover: #ffffff;
+  --vsc-fg-link: #3794ff;
+  --vsc-fg-keyword: #569cd6;
+  --vsc-fg-string: #ce9178;
+  --vsc-fg-comment: #6a9955;
+
+  /* Accent */
+  --vsc-accent: #007acc;
+  --vsc-accent-hover: #1a8ad4;
+  --vsc-accent-active: #005fa3;
+
+  /* Borders */
+  --vsc-border: #3e3e3e;
+  --vsc-border-light: #474747;
+  --vsc-border-focus: #007acc;
+  --vsc-border-panel: #252526;
+
+  /* Fonts */
+  --vsc-font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --vsc-font-mono: 'Consolas', 'Courier New', 'Cascadia Code', 'Droid Sans Mono', monospace;
+  --vsc-font-size: 13px;
+  --vsc-font-size-sm: 11px;
+  --vsc-font-size-xs: 10px;
+  --vsc-line-height: 1.5;
+
+  /* Sizes */
+  --vsc-activity-bar-width: 48px;
+  --vsc-sidebar-width: 260px;
+  --vsc-ai-panel-width: 340px;
+  --vsc-tab-height: 35px;
+  --vsc-status-bar-height: 22px;
+  --vsc-title-bar-height: 30px;
+  --vsc-terminal-height: 200px;
+
+  /* Misc */
+  --vsc-scrollbar-size: 10px;
+  --vsc-scrollbar-color: rgba(121, 121, 121, 0.4);
+  --vsc-scrollbar-color-hover: rgba(121, 121, 121, 0.7);
+}
+
+/* ─── Reset & Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--vsc-bg-editor);
+  color: var(--vsc-fg-primary);
+  font-family: var(--vsc-font-ui);
+  font-size: var(--vsc-font-size);
+  line-height: var(--vsc-line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+/* ─── Scrollbars ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: var(--vsc-scrollbar-size);
+  height: var(--vsc-scrollbar-size);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--vsc-scrollbar-color);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vsc-scrollbar-color-hover);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ─── Typography ────────────────────────────────────────────────────────────── */
+code, pre, .mono {
+  font-family: var(--vsc-font-mono);
+  font-size: 13px;
+}
+
+a {
+  color: var(--vsc-fg-link);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ─── Focus ─────────────────────────────────────────────────────────────────── */
+*:focus {
+  outline: 1px solid var(--vsc-border-focus);
+  outline-offset: -1px;
+}
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── Layout Utilities ───────────────────────────────────────────────────────── */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-y-auto { overflow-y: auto; }
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── VSCode Icon Buttons ────────────────────────────────────────────────────── */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--vsc-fg-icon);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.1s, background 0.1s;
+}
+.icon-btn:hover {
+  background: var(--vsc-bg-hover);
+  color: var(--vsc-fg-icon-hover);
+}
+.icon-btn:active {
+  background: rgba(255,255,255,0.1);
+}
+
+/* ─── VSCode Buttons ─────────────────────────────────────────────────────────── */
+.vsc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--vsc-font-ui);
+  font-size: var(--vsc-font-size);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.vsc-btn-primary {
+  background: var(--vsc-bg-button);
+  color: #ffffff;
+}
+.vsc-btn-primary:hover {
+  background: var(--vsc-bg-button-hover);
+}
+.vsc-btn-secondary {
+  background: var(--vsc-bg-button-secondary);
+  color: var(--vsc-fg-primary);
+}
+.vsc-btn-secondary:hover {
+  background: #45494e;
+}
+.vsc-btn-ghost {
+  background: transparent;
+  color: var(--vsc-fg-muted);
+  border: 1px solid var(--vsc-border);
+}
+.vsc-btn-ghost:hover {
+  background: var(--vsc-bg-hover);
+  color: var(--vsc-fg-primary);
+}
+
+/* ─── Dividers ───────────────────────────────────────────────────────────────── */
+.vsc-divider-h {
+  width: 100%;
+  height: 1px;
+  background: var(--vsc-border);
+  flex-shrink: 0;
+}
+.vsc-divider-v {
+  width: 1px;
+  height: 100%;
+  background: var(--vsc-border);
+  flex-shrink: 0;
+}
+
+/* ─── Accordion ──────────────────────────────────────────────────────────────── */
+.accordion-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease, opacity 0.15s ease;
+}
+.accordion-open {
+  max-height: 4000px;
+  opacity: 1;
+}
+
+/* ─── Spinner ─────────────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--vsc-border);
+  border-top-color: var(--vsc-accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ─── Blinking cursor for streaming ─────────────────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink::after {
+  content: '▋';
+  animation: blink 1s step-end infinite;
+  color: var(--vsc-accent);
+}
+
+/* ─── Badges ─────────────────────────────────────────────────────────────────── */
+.vsc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--vsc-bg-badge);
+  color: var(--vsc-fg-badge);
+  border-radius: 10px;
+  font-size: var(--vsc-font-size-xs);
+  font-weight: 600;
+}
+
+/* ─── Tooltip ────────────────────────────────────────────────────────────────── */
+.vsc-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: var(--vsc-bg-tooltip);
+  border: 1px solid var(--vsc-border-light);
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: var(--vsc-font-size);
+  color: var(--vsc-fg-primary);
+  max-width: 400px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  pointer-events: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ─── Panel resize handle ────────────────────────────────────────────────────── */
+[data-panel-resize-handle-id] {
+  background: var(--vsc-border) !important;
+  transition: background 0.1s;
+}
+[data-panel-resize-handle-id]:hover,
+[data-panel-resize-handle-id][data-resize-handle-active] {
+  background: var(--vsc-accent) !important;
+}
+
+/* ─── Markdown in AI responses ───────────────────────────────────────────────── */
+.markdown-content {
+  user-select: text;
+  cursor: text;
+  font-size: var(--vsc-font-size);
+  line-height: 1.7;
+  padding: 4px 0;
+}
+.markdown-content p { margin: 6px 0; }
+.markdown-content ul, .markdown-content ol {
+  margin: 6px 0;
+  padding-left: 22px;
+}
+.markdown-content li { margin: 3px 0; line-height: 1.65; }
+.markdown-content strong { color: var(--vsc-fg-primary); font-weight: 600; }
+.markdown-content em { color: var(--vsc-fg-muted); font-style: italic; }
+.markdown-content code {
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: var(--vsc-font-mono);
+  font-size: 12px;
+  color: #ce9178;
+}
+
+/* ─── Code blocks with header (lang label + copy button) ─────────────────────── */
+.code-block-wrapper {
+  position: relative;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid var(--vsc-border);
+  overflow: hidden;
+  background: #0d0d0d;
+}
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--vsc-border);
+  user-select: none;
+}
+.code-block-lang {
+  font-family: var(--vsc-font-mono);
+  font-size: 11px;
+  color: var(--vsc-fg-inactive);
+  text-transform: lowercase;
+  letter-spacing: 0.03em;
+}
+.code-copy-btn {
+  background: transparent;
+  border: 1px solid var(--vsc-border);
+  border-radius: 3px;
+  padding: 2px 8px;
+  color: var(--vsc-fg-muted);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: var(--vsc-font-ui);
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.code-copy-btn:hover {
+  background: rgba(255,255,255,0.07);
+  color: var(--vsc-fg-secondary);
+  border-color: var(--vsc-border-light);
+}
+.code-block-pre {
+  margin: 0 !important;
+  padding: 10px 14px !important;
+  overflow-x: auto;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+.code-block-pre code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--vsc-fg-primary);
+  font-family: var(--vsc-font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+/* Clickable inline code mapped to a symbol in the active file */
+.code-symbol {
+  cursor: pointer;
+  border-bottom: 1px dotted #ce9178;
+  transition: background 0.12s;
+  color: #9cdcfe !important;
+  background: rgba(156,220,254,0.07);
+}
+.code-symbol:hover {
+  background: rgba(156,220,254,0.18);
+  border-bottom-style: solid;
+}

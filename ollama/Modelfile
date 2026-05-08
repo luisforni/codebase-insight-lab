@@ -1,0 +1,24 @@
+FROM /gguf/Qwen2.5-7B-Instruct-Q4_K_M.gguf
+
+# ── Generation parameters ─────────────────────────────────────────────────────
+PARAMETER temperature 0.2
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.1
+
+# 32k context window
+PARAMETER num_ctx 32768
+
+# ── Chat template (ChatML — native Qwen2.5 format) ───────────────────────────
+# Uses {{ .System }} so agent system prompts injected via the API are applied.
+TEMPLATE """<|im_start|>system
+{{ .System }}<|im_end|>
+<|im_start|>user
+{{ .Prompt }}<|im_end|>
+<|im_start|>assistant
+"""
+
+SYSTEM """You are Qwen2.5, an advanced AI assistant specialized in reasoning, coding, analysis, and structured outputs. You produce clear, accurate, and concise responses."""
+
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"

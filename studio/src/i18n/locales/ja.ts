@@ -1,0 +1,16 @@
+﻿import type { Translations } from './es'
+
+const ja: Translations = {
+  app: { name: 'Codebase Insight Lab', openFolder: 'フォルダを開く', addFolder: 'フォルダを追加', recentProjects: '最近のプロジェクト', saveSession: 'セッションを保存', newSession: '新しいセッション', settings: '設定', language: '言語', noWorkspace: 'ワークスペースなし', openToStart: 'フォルダを開いて開始' },
+  explorer: { title: 'エクスプローラー', noFolder: 'フォルダが開いていません', noFolderDesc: 'フォルダを開いてファイルを参照', addFolder: '+ フォルダを追加', loading: '読み込み中...' },
+  editor: { noFileOpen: 'ファイルが開いていません', noFileDesc: 'エクスプローラーからファイルを選択', analyzeBtn: '⚡ エージェントで分析', analyzingHint: '分析中...', line: '行', col: '列' },
+  ai: { analysis: '分析', coder: 'コーダー', summary: 'サマリー', analysisTitle: 'AI 分析', coderTitle: 'AI コーダー', summaryTitle: 'AI サマリー', noResponses: '回答なし', noResponsesDesc: 'ファイルを開いて ⚡ 分析をクリック', analyzing: 'エージェントが分析中...', clearResponses: '回答をクリア', askPlaceholder: 'コードについて質問...', send: '送信', askNext: '次に質問', depth: '深度', depthSummary: 'サマリー', depthTechnical: '技術的', depthComplete: '完全', depthEli5: 'わかりやすい説明', depthSenior: 'シニア Dev', coderTaskPlaceholder: 'コーディングタスクを説明...', coderGenerate: '変更を生成', coderGenerating: '生成中...', coderAcceptAll: 'すべて承認', coderRejectAll: 'すべて拒否', coderNoPending: '保留中の変更なし', coderNoPendingDesc: 'タスクを説明してください', coderAccept: '承認', coderReject: '拒否', coderExplain: '説明', summaryGenerate: 'ドキュメント生成', summaryGenerating: '生成中...', summaryNoDoc: 'ドキュメントなし', summaryNoDocDesc: '完全な分析を生成', summaryEdit: '編集', summarySave: '保存', summaryExport: 'エクスポート', modelSelector: 'モデルを選択', agents: 'エージェント', connected: 'Cortex 接続済み', disconnected: 'Cortex 切断', conversationHistory: '会話履歴', newConversation: '新しい会話', loadConversation: '会話を読み込む', deleteResponse: '回答を削除', responseInterrupted: '中断', responseInterruptedTitle: '接続が中断されました。この回答は不完全です。' },
+  depth: { summary: '簡潔な概要', technical: '詳細な技術説明', complete: '包括的な分析', eli5: 'わかりやすい説明', senior: 'シニア開発者との対話' },
+  terminal: { title: 'ターミナル', newTerminal: '新しいターミナル', closeTerminal: 'ターミナルを閉じる', clear: 'クリア', renameTerminal: '名前を変更', placeholder: 'コマンドを入力...', running: '実行中...', exitCode: '終了コード' },
+  diff: { proposed: '提案された変更', original: '元のファイル', modified: '変更後', accept: '承認', reject: '拒否', explain: '変更を説明', change: '件の変更', changes: '件の変更', acceptAll: 'すべて承認', rejectAll: 'すべて拒否', noChanges: '変更なし', applied: '変更を適用', rejected: '変更を拒否' },
+  status: { terminal: 'ターミナル', ln: '行', col: '列' },
+  session: { saved: 'セッションを保存しました', loaded: 'セッションを読み込みました', noRecent: '最近のプロジェクトなし', saveProject: 'プロジェクトを保存', loadProject: 'プロジェクトを読み込む', projectName: 'プロジェクト名', lastOpened: '最終オープン', conversations: '件の会話', resumeSession: 'セッションを再開', newSession: '新しいセッション', restore: '前回のセッションを復元', restoreProject: 'プロジェクトを再開', restored: 'セッションを復元しました', saving: 'セッションを保存中...', clickToRestore: 'クリックして開く' },
+  run: { title: 'プロジェクトを実行', command: 'コマンド', omit: 'ファイル/フォルダを除外', omitHint: 'カンマ区切りのパターン（例: .env,tests/）', contextPrompt: 'コンテキスト（任意）', contextHint: 'AIエージェント用の追加コンテキスト', execute: '実行', skip: 'スキップ', running: '実行中...', analyzing: 'エラーを分析中...', noCommand: '実行コマンドが見つかりません', errorFound: 'エラーを検出しました', runBtn: '▶ 実行', runningBtn: '⏳ 実行中...', analyzeProject: '🔍 プロジェクト分析', analyzingProject: '分析中...', lastRun: '前回の結果' },
+  config: { title: 'プロジェクト設定', created: '設定ディレクトリを作成しました', gitignoreUpdated: '.gitignoreを更新しました', configDir: '設定ディレクトリ', save: '変更を保存', confirmEdit: '変更を確認' },
+}
+export default ja

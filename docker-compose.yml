@@ -1,0 +1,103 @@
+name: codebase-insight-lab
+
+# ── DEVELOPMENT — hot-reload on all services ─────────────────────────────────
+# Setup:
+#   1. docker compose up --build
+#
+# First run (model not yet in volume):
+#   docker compose exec ollama ollama list
+#   If empty, register the model once:
+#   docker compose exec ollama ollama create qwen25-7b-instruct -f /models/Modelfile
+#   (requires the GGUF to be present — see ollama/Modelfile for the expected path)
+#
+# Subsequent runs: model is already in the ollama-data volume — starts instantly.
+#
+# Services:
+#   studio  →  http://localhost:5173
+#   cortex  →  http://localhost:8000
+#   ollama  →  http://localhost:11434  (internal: http://ollama:11434)
+
+services:
+
+  # ── ollama (local LLM server) ──────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama          # persists registered models across restarts
+      - ./ollama:/models:ro                # Modelfile + entrypoint.sh
+    entrypoint: ["/bin/bash", "/models/entrypoint.sh"]
+    networks:
+      - insight-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  # ── cortex (FastAPI + uvicorn --reload) ────────────────────────────────────
+  cortex:
+    build:
+      context: ./cortex
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./cortex:/app
+      - cortex-data:/app/data
+    env_file:
+      - .env
+    environment:
+      CORTEX_HOST: "0.0.0.0"
+      CORTEX_PORT: "8000"
+      CORTEX_RELOAD: "true"
+      DB_PATH: "data/insight.db"
+      EXPLANATIONS_PATH: "data/explanations"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_MODEL: "qwen25-7b-instruct"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - insight-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── studio (Vite dev server) ───────────────────────────────────────────────
+  studio:
+    build:
+      context: ./studio
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./studio:/app
+      - studio-node-modules:/app/node_modules
+    environment:
+      CORTEX_URL: "http://cortex:8000"
+      CORTEX_WS_URL: "ws://cortex:8000"
+      VITE_CORTEX_URL: "http://localhost:8000"
+      VITE_CORTEX_WS_URL: "ws://localhost:8000"
+    depends_on:
+      cortex:
+        condition: service_healthy
+    networks:
+      - insight-net
+    restart: unless-stopped
+
+networks:
+  insight-net:
+    driver: bridge
+
+volumes:
+  ollama-data:
+  cortex-data:
+  studio-node-modules:
